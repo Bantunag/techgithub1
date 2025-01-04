@@ -1,11 +1,11 @@
 import subprocess
 
-def deploy_notebook(workspace_path, local_path, profile):
+def deploy_notebook(workspace_path, local_path):
     command = [
-        "databricks", "--profile", profile, "workspace", "import",
+        "databricks", "workspace", "import",
         "--overwrite", "--language", "PYTHON", local_path, workspace_path
     ]
     subprocess.run(command, check=True)
 
 if __name__ == "__main__":
-    deploy_notebook("/Workspace/Notebooks/my_notebook", "notebooks/my_notebook.py", "<profile-name>")
+    deploy_notebook("/Workspace/Notebooks/my_notebook", "notebooks/my_notebook.py")
