@@ -24,9 +24,8 @@ jobs:
 
     - name: Set up Databricks credentials
       run: |
-        # Ensure the directory exists but do not overwrite it as a file
         mkdir -p ~/.databrickscfg
-        echo "[DEFAULT]" > ~/.databrickscfg/databrickscfg  # Direct output to the correct file
+        echo "[DEFAULT]" > ~/.databrickscfg/databrickscfg
         echo "host = ${DATABRICKS_HOST}" >> ~/.databrickscfg/databrickscfg
         echo "token = ${DATABRICKS_TOKEN}" >> ~/.databrickscfg/databrickscfg
 
