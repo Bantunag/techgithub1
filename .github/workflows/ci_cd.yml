@@ -24,7 +24,7 @@ jobs:
 
       - name: Configure Databricks CLI
         run: |
-          mkdir -p ~/.databrickscfg
+          mkdir -p ~/.databricks
           echo "[DEFAULT]" > ~/.databrickscfg
           echo "host = ${DATABRICKS_HOST}" >> ~/.databrickscfg
           echo "token = ${DATABRICKS_TOKEN}" >> ~/.databrickscfg
