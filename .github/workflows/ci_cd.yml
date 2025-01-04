@@ -24,10 +24,11 @@ jobs:
 
     - name: Set up Databricks credentials
       run: |
+        # Ensure the directory exists but do not overwrite it as a file
         mkdir -p ~/.databrickscfg
-        echo "[DEFAULT]" > ~/.databrickscfg
-        echo "host = ${DATABRICKS_HOST}" >> ~/.databrickscfg
-        echo "token = ${DATABRICKS_TOKEN}" >> ~/.databrickscfg
+        echo "[DEFAULT]" > ~/.databrickscfg/databrickscfg  # Direct output to the correct file
+        echo "host = ${DATABRICKS_HOST}" >> ~/.databrickscfg/databrickscfg
+        echo "token = ${DATABRICKS_TOKEN}" >> ~/.databrickscfg/databrickscfg
 
     - name: Deploy Notebook to Databricks
       run: |
