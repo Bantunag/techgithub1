@@ -22,7 +22,7 @@ def deploy_notebook(workspace_path, local_path, profile):
 
 if __name__ == "__main__":
     # Paths and profile
-    workspace_path = "/Workspace/Users/your_username/my_notebook"  # Update your Databricks workspace path
+    workspace_path = "/Workspace/Users/raju.dileep23@gmail.com/my_notebook"  # Update your Databricks workspace path
     local_path = "notebooks/my_notebook.py"  # Local path to the notebook file
     profile = "databricks_profile"  # Databricks CLI profile (can be empty for default)
 
