@@ -22,16 +22,16 @@ jobs:
       run: |
         pip install databricks-cli  # Ensure the Databricks CLI is installed
 
-    - name: Set up Databricks credentials
+    - name: Set up Databricks CLI configuration
       run: |
-        mkdir -p ~/.databrickscfg
-        echo "[DEFAULT]" > ~/.databrickscfg/databrickscfg
-        echo "host = ${DATABRICKS_HOST}" >> ~/.databrickscfg/databrickscfg
-        echo "token = ${DATABRICKS_TOKEN}" >> ~/.databrickscfg/databrickscfg
+        mkdir -p ~/.databrickscfg  # Create the config directory
+        echo "[DEFAULT]" > ~/.databrickscfg/databrickscfg  # Create config file
+        echo "host = ${DATABRICKS_HOST}" >> ~/.databrickscfg/databrickscfg  # Set host URL
+        echo "token = ${DATABRICKS_TOKEN}" >> ~/.databrickscfg/databrickscfg  # Set token
 
     - name: Deploy Notebook to Databricks
       run: |
         python ci_cd/deploy_notebook.py
       env:
-        DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}  # Store your Databricks host URL in GitHub Secrets
-        DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}  # Store your Databricks token in GitHub Secrets
+        DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}  # GitHub secret for host URL
+        DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}  # GitHub secret for token
