@@ -1,17 +1,30 @@
+# ci_cd/deploy_notebook.py
+
 import subprocess
-import os
+import sys
 
 def deploy_notebook(workspace_path, local_path, profile):
-    # Ensure the environment variables are set properly for the Databricks CLI to use
-    os.environ['DATABRICKS_HOST'] = os.getenv('DATABRICKS_HOST')
-    os.environ['DATABRICKS_TOKEN'] = os.getenv('DATABRICKS_TOKEN')
-
+    """Deploy a notebook to Databricks using the CLI"""
+    
+    # Command to deploy the notebook to Databricks
     command = [
         "databricks", "workspace", "import",
         "--overwrite", "--language", "PYTHON", local_path, workspace_path
     ]
-    subprocess.run(command, check=True)
+    
+    # Execute the command and check for success
+    try:
+        subprocess.run(command, check=True)
+        print(f"Successfully deployed notebook {local_path} to {workspace_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error deploying notebook: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
-    # Replace <profile-name> with an empty string since we're not using profiles in this case
-    deploy_notebook("/Workspace/Users/raju.dileep23@gmail.com/my_notebook", "notebooks/my_notebook.py", "")
+    # Paths and profile
+    workspace_path = "/Workspace/Users/your_username/my_notebook"  # Update your Databricks workspace path
+    local_path = "notebooks/my_notebook.py"  # Local path to the notebook file
+    profile = "databricks_profile"  # Databricks CLI profile (can be empty for default)
+
+    # Call the deploy function
+    deploy_notebook(workspace_path, local_path, profile)
