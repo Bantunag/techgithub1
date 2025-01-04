@@ -1,37 +1,43 @@
-name: Deploy Databricks Notebook
+# .github/workflows/ci_cd.yml
+
+name: CI/CD Pipeline for Databricks Notebook
 
 on:
   push:
     branches:
-      - main  # Trigger this action on a push to the 'main' branch (adjust as needed)
+      - main  # Trigger this workflow on push to the main branch
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # You can change the OS as per your requirements
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2  # Checkout the code from the repo
 
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.9  # Use the Python version you require
+        python-version: 3.9  # Specify Python version you require
 
     - name: Install dependencies
       run: |
-        pip install databricks-cli  # Ensure the Databricks CLI is installed
+        pip install -r requirements.txt  # Install Python dependencies
 
-    - name: Set up Databricks CLI configuration
+    - name: Run tests
       run: |
-        mkdir -p ~/.databrickscfg  # Create the config directory
+        python ci_cd/run_tests.py  # Run the tests script (can be expanded)
+
+    - name: Set up Databricks CLI
+      run: |
+        mkdir -p ~/.databrickscfg  # Create the configuration directory
         echo "[DEFAULT]" > ~/.databrickscfg/databrickscfg  # Create config file
         echo "host = ${DATABRICKS_HOST}" >> ~/.databrickscfg/databrickscfg  # Set host URL
         echo "token = ${DATABRICKS_TOKEN}" >> ~/.databrickscfg/databrickscfg  # Set token
 
     - name: Deploy Notebook to Databricks
       run: |
-        python ci_cd/deploy_notebook.py
+        python ci_cd/deploy_notebook.py  # Deploy the notebook using the deploy script
       env:
-        DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}  # GitHub secret for host URL
-        DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}  # GitHub secret for token
+        DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}  # Databricks host URL stored in GitHub secrets
+        DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}  # Databricks token stored in GitHub secrets
