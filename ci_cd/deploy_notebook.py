@@ -7,11 +7,11 @@ def deploy_notebook(workspace_path, local_path, profile):
     os.environ['DATABRICKS_TOKEN'] = os.getenv('DATABRICKS_TOKEN')
 
     command = [
-        "databricks", "--profile", profile, "workspace", "import",
+        "databricks", "workspace", "import",
         "--overwrite", "--language", "PYTHON", local_path, workspace_path
     ]
     subprocess.run(command, check=True)
 
 if __name__ == "__main__":
-    # Replace '<profile-name>' with the actual profile name (e.g., 'databricks_profile')
-    deploy_notebook("/Workspace/Users/raju.dileep23@gmail.com/my_notebook", "notebooks/my_notebook.py", "databricks_profile")
+    # Replace <profile-name> with an empty string since we're not using profiles in this case
+    deploy_notebook("/Workspace/Users/raju.dileep23@gmail.com/my_notebook", "notebooks/my_notebook.py", "")
