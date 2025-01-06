@@ -1,11 +1,9 @@
-# .github/workflows/ci_cd.yml
-
-name: CI/CD Pipeline for Databricks Notebook
+name: CI/CD Pipeline
 
 on:
   push:
     branches:
-      - main  # Trigger this workflow on push to the main branch
+      - main
 
 jobs:
   deploy:
@@ -13,31 +11,30 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2  # Checkout the code from the repo
+      uses: actions/checkout@v3
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
-        python-version: 3.9  # Specify Python version you require
+        python-version: 3.9
 
     - name: Install dependencies
-      run: |
-        pip install -r requirements.txt  # Install Python dependencies
+      run: pip install -r requirements.txt
 
-    - name: Run tests
+    - name: Install Vault CLI
       run: |
-        python ci_cd/run_tests.py  # Run the tests script (can be expanded)
+        curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+        echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+        sudo apt update && sudo apt install vault -y
 
-    - name: Set up Databricks CLI
-      run: |
-        mkdir -p ~/.databrickscfg  # Create the configuration directory
-        echo "[DEFAULT]" > ~/.databrickscfg/databrickscfg  # Create config file
-        echo "host = ${DATABRICKS_HOST}" >> ~/.databrickscfg/databrickscfg  # Set host URL
-        echo "token = ${DATABRICKS_TOKEN}" >> ~/.databrickscfg/databrickscfg  # Set token
-
-    - name: Deploy Notebook to Databricks
-      run: |
-        python ci_cd/deploy_notebook.py  # Deploy the notebook using the deploy script
+    - name: Login to Vault
       env:
-        DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}  # Databricks host URL stored in GitHub secrets
-        DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}  # Databricks token stored in GitHub secrets
+        VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+      run: |
+        export VAULT_ADDR=http://127.0.0.1:8200
+        echo "${{ secrets.VAULT_TOKEN }}" | vault login -
+
+    - name: Deploy Notebooks
+      env:
+        VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+      run: python ci_cd/deploy_notebook.py
