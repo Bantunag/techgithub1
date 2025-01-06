@@ -1,30 +1,51 @@
-# ci_cd/deploy_notebook.py
+import os
+import hvac
+import requests
 
-import subprocess
-import sys
+def get_vault_secret():
+    """Retrieve Databricks credentials from Vault."""
+    vault_url = os.getenv("VAULT_ADDR", "http://127.0.0.1:8200")
+    vault_token = os.getenv("VAULT_TOKEN")
 
-def deploy_notebook(workspace_path, local_path, profile):
-    """Deploy a notebook to Databricks using the CLI"""
-    
-    # Command to deploy the notebook to Databricks
-    command = [
-        "databricks", "workspace", "import",
-        "--overwrite", "--language", "PYTHON", local_path, workspace_path
-    ]
-    
-    # Execute the command and check for success
-    try:
-        subprocess.run(command, check=True)
-        print(f"Successfully deployed notebook {local_path} to {workspace_path}")
-    except subprocess.CalledProcessError as e:
-        print(f"Error deploying notebook: {e}")
-        sys.exit(1)
+    client = hvac.Client(url=vault_url, token=vault_token)
+
+    if not client.is_authenticated():
+        raise Exception("Vault authentication failed")
+
+    secret_path = "secret/databricks-config"
+    secret = client.secrets.kv.v2.read_secret_version(path=secret_path)
+    return secret["data"]["data"]
+
+def deploy_notebook(notebook_path):
+    """Deploy a notebook to Azure Databricks."""
+    credentials = get_vault_secret()
+    databricks_host = credentials["host"]
+    databricks_token = credentials["token"]
+
+    # Define Databricks API URL
+    url = f"{databricks_host}/api/2.0/workspace/import"
+
+    with open(notebook_path, "r") as notebook_file:
+        content = notebook_file.read()
+
+    response = requests.post(
+        url,
+        headers={"Authorization": f"Bearer {databricks_token}"},
+        json={
+            "path": f"/Shared/{os.path.basename(notebook_path)}",
+            "overwrite": True,
+            "format": "SOURCE",
+            "content": content,
+        },
+    )
+
+    if response.status_code == 200:
+        print(f"Successfully deployed {notebook_path} to Databricks.")
+    else:
+        print(f"Failed to deploy {notebook_path}. Response: {response.text}")
 
 if __name__ == "__main__":
-    # Paths and profile
-    workspace_path = "/Workspace/bantu/my_notebook"  # Update your Databricks workspace path
-    local_path = "notebooks/my_notebook.py"  # Local path to the notebook file
-    profile = "databricks_profile"  # Databricks CLI profile (can be empty for default)
-
-    # Call the deploy function
-    deploy_notebook(workspace_path, local_path, profile)
+    notebook_dir = "notebooks/"
+    for notebook in os.listdir(notebook_dir):
+        if notebook.endswith(".py"):
+            deploy_notebook(os.path.join(notebook_dir, notebook))
