@@ -22,8 +22,8 @@ jobs:
 
       - name: Authenticate with HashiCorp Vault
         run: |
-          export VAULT_ADDR='http://127.0.0.1:8200'
+          export VAULT_ADDR='http://127.0.0.1:8200'  # Adjust this if necessary
           export VAULT_TOKEN=${{ secrets.VAULT_TOKEN }}
 
-      - name: Deploy Notebooks to Databricks
+      - name: Deploy Notebook to Databricks
         run: python ci_cd/deploy_notebook.py
