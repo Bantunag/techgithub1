@@ -1,2 +1,3 @@
+hvac
 databricks-cli
 pytest
