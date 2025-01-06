@@ -1,14 +1,14 @@
 import subprocess
 import sys
 import hvac
+import os
 
 def get_vault_secrets():
-    """Fetch Databricks credentials from HashiCorp Vault."""
-    vault_url = "http://127.0.0.1:8200"  # Update this if your Vault URL differs
+    """Fetch Databricks credentials from HashiCorp Vault"""
+    vault_url = "http://127.0.0.1:8200"  # Update with your Vault server URL
     vault_token = os.environ.get("VAULT_TOKEN")  # Fetch token from environment variable
-    
     if not vault_token:
-        raise ValueError("Vault token not found in environment variables. Make sure VAULT_TOKEN is set.")
+        raise ValueError("Vault token is missing. Ensure VAULT_TOKEN is set in environment variables.")
     
     client = hvac.Client(url=vault_url, token=vault_token)
 
@@ -43,11 +43,9 @@ def deploy_notebook(workspace_path, local_path):
         sys.exit(1)
 
 if __name__ == "__main__":
-    # Define notebooks to deploy
-    notebooks = [
-        {"workspace_path": "/Workspace/bantu/my_notebook", "local_path": "notebooks/my_notebook1.py"},
-    ]
-
-    # Deploy each notebook
-    for notebook in notebooks:
-        deploy_notebook(notebook["workspace_path"], notebook["local_path"])
+    # Define the notebook path and the target Databricks workspace path
+    workspace_path = "/Workspace/bantu/my_notebook"  # Databricks folder "bantu"
+    local_path = "notebooks/my_notebook.py"  # Path to your local notebook
+    
+    # Deploy the notebook
+    deploy_notebook(workspace_path, local_path)
