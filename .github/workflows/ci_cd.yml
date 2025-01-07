@@ -1,26 +1,25 @@
-name: CI/CD for Databricks Deployment
+name: CI/CD for Databricks Notebooks
 
 on:
   push:
     branches:
-      - main  # Adjust the branch name as needed
+      - main  # Trigger on pushes to the main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: '3.9'
 
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-      - name: Deploy Notebooks to Databricks
+      - name: Deploy notebooks to Databricks
         run: python ci_cd/deploy_notebook.py
