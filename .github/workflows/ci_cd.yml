@@ -1,40 +1,43 @@
-name: CI/CD for Azure Databricks
+# .github/workflows/ci_cd.yml
+
+name: CI/CD Pipeline for Databricks Notebook
 
 on:
   push:
     branches:
-      - main
+      - main  # Trigger this workflow on push to the main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v2  # Checkout the code from the repo
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.9
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9  # Specify Python version you require
 
-      - name: Cache Python Dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt  # Install Python dependencies
 
-      - name: Install Dependencies
-        run: pip install -r requirements.txt
+    - name: Run tests
+      run: |
+        python ci_cd/run_tests.py  # Run the tests script (can be expanded)
 
-      - name: Authenticate with HashiCorp Vault
-        run: |
-          echo "Vault Authentication: Successfully set up."
-        env:
-          VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+    - name: Set up Databricks CLI
+      run: |
+        mkdir -p ~/.databrickscfg  # Create the configuration directory
+        echo "[DEFAULT]" > ~/.databrickscfg/databrickscfg  # Create config file
+        echo "host = ${DATABRICKS_HOST}" >> ~/.databrickscfg/databrickscfg  # Set host URL
+        echo "token = ${DATABRICKS_TOKEN}" >> ~/.databrickscfg/databrickscfg  # Set token
 
-      - name: Deploy Notebook to Databricks
-        run: python ci_cd/deploy_notebook.py
-        env:
-          VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}  # Ensure it's passed to the script here
+    - name: Deploy Notebook to Databricks
+      run: |
+        python ci_cd/deploy_notebook.py  # Deploy the notebook using the deploy script
+      env:
+        DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}  # Databricks host URL stored in GitHub secrets
+        DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}  # Databricks token stored in GitHub secrets
