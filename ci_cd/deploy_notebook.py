@@ -1,4 +1,5 @@
 import os
+import base64
 import requests
 
 # Databricks configuration (hardcoded)
@@ -15,15 +16,20 @@ def upload_notebook(local_path, databricks_path):
     """
     url = f"{DATABRICKS_HOST}/api/2.0/workspace/import"
     headers = {"Authorization": f"Bearer {DATABRICKS_TOKEN}"}
-    
+
+    # Read the file and encode its content in base64
     with open(local_path, 'rb') as file:
-        data = {
-            "path": databricks_path,
-            "format": "SOURCE",  # SOURCE format for Python files
-            "overwrite": True
-        }
-        files = {"content": file}
-        response = requests.post(url, headers=headers, data=data, files=files)
+        content = base64.b64encode(file.read()).decode('utf-8')
+
+    data = {
+        "path": databricks_path,
+        "format": "SOURCE",  # Use SOURCE for Python files
+        "language": "PYTHON",
+        "content": content,
+        "overwrite": True
+    }
+
+    response = requests.post(url, headers=headers, json=data)
     
     if response.status_code == 200:
         print(f"Notebook uploaded successfully: {local_path} -> {databricks_path}")
