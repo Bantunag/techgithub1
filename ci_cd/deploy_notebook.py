@@ -35,7 +35,7 @@ def main():
     Deploy notebooks from the local 'notebooks/' directory to Databricks.
     """
     local_notebooks_dir = "notebooks"
-    databricks_base_path = "/Workspace/nagaraj"  # Adjust as needed
+    databricks_base_path = "/Workspace/nagaraj/my_notebook"  # Adjust as needed
 
     if not os.path.exists(local_notebooks_dir):
         print(f"Directory not found: {local_notebooks_dir}")
